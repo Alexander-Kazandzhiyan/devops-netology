@@ -42,27 +42,28 @@
 7. Команда vagrant ssh из директории, в которой содержится Vagrantfile, позволит вам оказаться внутри виртуальной машины без каких-либо дополнительных настроек. Попрактикуйтесь в выполнении обсуждаемых команд в терминале Ubuntu.
 Ответ: Получилось зайти внутрь ВМ.
 
-`PS E:\vagrant> vagrant ssh
-Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-80-generic x86_64)
 
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/advantage
-
-  System information as of Mon 15 Nov 2021 06:45:51 AM UTC
-
-  System load:  0.13              Processes:             139
-  Usage of /:   2.4% of 61.31GB   Users logged in:       0
-  Memory usage: 7%                IPv4 address for eth0: 10.0.2.15
-  Swap usage:   0%
-
-
-This system is built by the Bento project by Chef Software
-More information can be found at https://github.com/chef/bento
-vagrant@vagrant:~$ uname -a
-Linux vagrant 5.4.0-80-generic #90-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
-vagrant@vagrant:~$
-`
+    PS E:\vagrant> vagrant ssh
+    Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-80-generic x86_64)
+    
+      Documentation:  https://help.ubuntu.com
+      Management:     https://landscape.canonical.com
+      Support:        https://ubuntu.com/advantage
+    
+      System information as of Mon 15 Nov 2021 06:45:51 AM UTC
+    
+      System load:  0.13              Processes:             139
+      Usage of /:   2.4% of 61.31GB   Users logged in:       0
+      Memory usage: 7%                IPv4 address for eth0: 10.0.2.15
+      Swap usage:   0%
+    
+    
+    This system is built by the Bento project by Chef Software
+    More information can be found at https://github.com/chef/bento
+    vagrant@vagrant: $ uname -a
+    Linux vagrant 5.4.0-80-generic #90-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+    vagrant@vagrant: $
+    
 8. Ознакомиться с разделами man bash, почитать о настройках самого bash:
 1) какой переменной можно задать длину журнала history, и на какой строчке manual это описывается?
 2) что делает директива ignoreboth в bash?
