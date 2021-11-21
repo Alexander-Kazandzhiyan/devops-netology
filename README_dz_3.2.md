@@ -88,35 +88,19 @@ drwxr-xr-x 6 vagrant vagrant 4096 Nov 19 08:45 ..
 
 Видим, что в пайп ушёл весь вывод и stdout и stderr. То есть в пайп отправить только stderr пока не представляется возможным.
 
-Теперь сделаем, чтоб stderr выдавался на текущий терминал, а stdout на другой терминал.
-   
+Теперь выполним команду сделав переопределение стандартных потоков stdout stderr, меняя их местами через промежуточный файловый дискриптор. И отправим через пайп в grep
+ 
 ```bash
-    vagrant@vagrant:~$  bash 5>&1 2>&5 1>/dev/pts/1
-```
-    
-Выполняем команду:
-
-```bash
-    vagrant@vagrant:~$ ls -la dir-exist dir-not | grep N
-    ls: cannot access 'dir-not': No such file or directory
-```
-А на втором терминале отобразилось только это:
-
-```bash
+    vagrant@vagrant:~$ ls -la dir-exist dir-not 3>&1 1>&2 2>&3 | grep N
+    dir-exist:
+    total 8
     drwxrwxr-x 2 vagrant vagrant 4096 Nov 18 22:05 .
     drwxr-xr-x 6 vagrant vagrant 4096 Nov 19 08:45 ..
     -rw-rw-r-- 1 vagrant vagrant    0 Nov 18 22:05 file-exist
-```
-
-Коментарий: Я плохо понял задание. Кроме того в свмом вопросе явнвя ошибка: "Напоминаем: по умолчанию через pipe передается только stdout команды слева от | на stdin команды справа" - это ложь. Легко можно доказать.
-Вот доказательство. На вход команды grep попал от команды ls не только stduot, но и stderr в котором тоже нашлась буква N.
-```bash
-    vagrant@vagrant:~$ ls -la dir-exist dir-not | grep N
     ls: cannot access 'dir-not': No such file or directory
-    drwxrwxr-x 2 vagrant vagrant 4096 Nov 18 22:05 .
-    drwxr-xr-x 6 vagrant vagrant 4096 Nov 19 08:45 ..
-    -rw-rw-r-- 1 vagrant vagrant    0 Nov 18 22:05 file-exist
-````
+    vagrant@vagrant:~$
+ ```
+Мы видим, что на экран теперь сначала вывелся стандартный вывод, без ошибок, а вывод ошибок ушёл через пайп в grep.
 
 9. Что выведет команда `cat /proc/$$/environ`? Как еще можно получить аналогичный по содержанию вывод?
 
