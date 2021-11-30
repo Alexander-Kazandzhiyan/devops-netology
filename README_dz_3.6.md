@@ -65,9 +65,6 @@ Connection closed by foreign host.
 Ради спортивного интереса будем определять свой адрес из командной строки. Воспользуемся первым же загугленным адресом сервера, возвращающего нам наш адрес:
 ```bash
 [root@DevOpser tools]# curl -s http://tnx.nl/ip
-194.190.8.221
-
-[root@DevOpser tools]# curl -s http://tnx.nl/ip
 162.55.33.177
 ```
 
