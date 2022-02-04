@@ -1,0 +1,9 @@
+:9100 {
+    proxy / nodeexporter:9100 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}

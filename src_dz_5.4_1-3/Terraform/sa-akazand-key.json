@@ -1,0 +1,3 @@
+тут я всё удалил. получай заново
+примерно так:
+yc iam key create --service-account-name sa-akazand -o sa-akazand-key.json
