@@ -701,7 +701,7 @@ test_database=> \d+ orders;
  price  | integer               |           |          | 0                                  | plain    |              |
 Indexes:
     "orders_pkey" PRIMARY KEY, btree (id)
-    "orders_title_key" **UNIQUE** CONSTRAINT, btree (title)
+    "orders_title_key" UNIQUE CONSTRAINT, btree (title)
 Rules:
     order_insert_to_1 AS
     ON INSERT TO orders
@@ -724,7 +724,7 @@ test_database=> \d+ orders_1;
  price  | integer               |           |          | 0                                  | plain    |              |
 Indexes:
     "orders_1_pkey" PRIMARY KEY, btree (id)
-    "orders_1_title_key" **UNIQUE** CONSTRAINT, btree (title)
+    "orders_1_title_key" UNIQUE CONSTRAINT, btree (title)
 Check constraints:
     "orders_1_price_check" CHECK (price > 499)
 Inherits: orders
@@ -739,7 +739,7 @@ test_database=> \d+ orders_2;
  price  | integer               |           |          | 0                                  | plain    |              |
 Indexes:
     "orders_2_pkey" PRIMARY KEY, btree (id)
-    "orders_2_title_key" **UNIQUE** CONSTRAINT, btree (title)
+    "orders_2_title_key" UNIQUE CONSTRAINT, btree (title)
 Check constraints:
     "orders_2_price_check" CHECK (price <= 499)
 Inherits: orders
