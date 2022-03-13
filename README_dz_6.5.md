@@ -159,7 +159,7 @@ tar -xzf elasticsearch-8.0.1-linux-x86_64.tar.gz -C /
 cd /elasticsearch-8.0.1/
 #Обявляем переменную окружения с указанием папки установки elastic и записываем её чтоб при перезапуске она появлялась.
 export ES_HOME=`pwd`
-echo "ES_HOME="$ES_HOME >> /etc/environment
+echo "ES_HOME="$ES_HOME >> /etc/environment  # это почему то не работает в Centos8. Использовал директиву ENV в Dockerfile
 # делаем бекап дефолтного конфига
 cp $ES_HOME/config/elasticsearch.yml $ES_HOME/config/elasticsearch.yml.bak
 ```
@@ -170,7 +170,7 @@ echo "cluster.name: Netology-Cluster" >> $ES_HOME/config/elasticsearch.yml
 echo "node.name: netology_test" >> $ES_HOME/config/elasticsearch.yml
 echo "path.data: /var/lib/elastic" >> $ES_HOME/config/elasticsearch.yml
 ```
-вопросов не вызывают. То есть делаем по заданию, как попросили. То есть кое что на чём придётся остановиться - настройки безопасности.
+вопросов не вызывают. То есть делаем по заданию, как попросили. То есть кое что, на чём придётся остановиться - настройки безопасности.
 
 Итак, по-дефолту при первом запуске `elasticsearch` создаёт в своём конфиге ещё ряд параметров по безопасности, которых там нет изначально. А именно включает механизмы авторизации, чтобы каждый запрос к нему должен был сопровозжаться вводом пользователя и пароля. При первом запуске он сам создаёт юзера `elastic` и генерит ему пароль, который выводит на экран.
 Кроме того при первом запуске он настраивает себя на работу с SSL то есть по https. А для этого генерирует SSL-сертифкат, который тоже выдаёт на экран.
@@ -264,7 +264,7 @@ CMD su elasticsearch -c "$ES_HOME/bin/elasticsearch"
 ```
 Всё, что находится под директивами RUN - это так называемые слои. То есть команды, которые должны выполняться для того чтобы из образа Centos получился нужный нам образ для контейнера с elasticsearch.
 Эта запись `ENV ES_HOME="/elasticsearch-8.0.1"` создаёт в контейнере глобальную переменную.
-Эта запись `CMD su elasticsearch -c "$ES_HOME/bin/elasticsearch"` организует автозапуск команды при старте контейнера.
+Эта запись `CMD su elasticsearch -c "$ES_HOME/bin/elasticsearch"` организует автозапуск `elasticsearch` при старте контейнера.
 
 Теперь осуществим создание нашего нового образа на основе образа `Centos` и `Dockerfile`:
 ```bash
@@ -273,7 +273,7 @@ user1@devopserubuntu:~$ sudo docker build . -t centoselastic:0.5
 Successfully built 2987dfd3aff1
 Successfully tagged centoselastic:0.5
 ```
-Проверяем, что образ создался
+Проверяем, что образ создался:
 ```bash
 user1@devopserubuntu:~$ sudo docker image ls | grep centos
 centoselastic     0.5       2987dfd3aff1   17 minutes ago   2GB
@@ -309,9 +309,10 @@ user1@devopserubuntu:~$ sudo docker exec -it centos-elastix bash -c "curl -k htt
   "tagline" : "You Know, for Search"
 }
 ```
+Этот запрос мы сделали на хостовой машине. Все дальнейшие запросы этого ДЗ будем делать уже внутри контейнера.
 Задание 1 выполнено.
 
-В случае необходимости для работы внутри контейнера можно выполнить команду и попасть в его консоль:
+Для работы внутри контейнера нужно выполнить команду запуска `bash` и попасть в его консоль:
 ```bash
 user1@devopserubuntu:~$ sudo docker exec -it centos-elastix /bin/bash
 [sudo] password for user1:
@@ -558,8 +559,8 @@ yellow open ind-3 cJ7sWJdoT4KIE2_A_LUBsA 4 2 0 0 900b 900b
 yellow open ind-2 bR2Fs2HjSYifIBIQMcWBjQ 2 1 0 0 450b 450b
 ```
 Как мы видим кластер в состояние `yelow` , а также ind-2 и ind-3.
-Очевидно, что индекс 1 зелёный так как текущее положение вещей соответствует, заданным ему при создании, параметрам. А именно 1 шард и 0 реплик.
-А вот для 2 и 3 явно не хватает ни шард ни реплик, поэтому у них статус yellow.
+Очевидно, что индекс 1 зелёный так как текущее положение вещей соответствует, заданным ему при создании, параметрам. А именно 0 реплик.
+А вот для 2 и 3 явно не хватает реплик, поэтому у них статус yellow.
 
 Кластер в состоянии 'yellow' из-за того, что в нём у ноды нет реплик, а значит нет возможности обеспечить отказоустойчивость и сохранность данных.
 
