@@ -111,10 +111,10 @@ Successfully installed awscli-1.24.6 botocore-1.26.6 docutils-0.16 python-dateut
 Создаём пользователя 'DevOps_console_user'. Потом заходим в его настройки и создаём ключ доступа.
 ```bash
 Access key ID
-AKIAVSFQ2YAXGILJKFLP
+AKIAVSF_______ILJKFLP
 
 Secret access key
-azkh2QQYh1StLzFRDFRFb5kQunLMWfpMIT9j7ZGs
+azkh2QQYh1________RFb5kQunLMWfpMIT9j7ZGs
 ```
 Находим, какой регион присвоен аккаунту: `us-east-1`
 Output format будем указывать `json`.
@@ -136,18 +136,18 @@ Output format будем указывать `json`.
     export AWS_SECRET_ACCESS_KEY=(your secret access key)
     ```
 ```bash
-user1@devopserubuntu:~$ export export AWS_ACCESS_KEY_ID=AKIAVSFQ2YAXGILJKFLP
-user1@devopserubuntu:~$ export AWS_SECRET_ACCESS_KEY=azkh2QQYh1StLzFRDFRFb5kQunLMWfpMIT9j7ZGs
+user1@devopserubuntu:~$ export export AWS_ACCESS_KEY_ID=AKIAVS_______ILJKFLP
+user1@devopserubuntu:~$ export AWS_SECRET_ACCESS_KEY=azkh2QQY__________FRFb5kQunLMWfpMIT9j7ZGs
 
 user1@devopserubuntu:~$ env | grep AWS
-AWS_SECRET_ACCESS_KEY=azkh2QQYh1StLzFRDFRFb5kQunLMWfpMIT9j7ZGs
-AWS_ACCESS_KEY_ID=AKIAVSFQ2YAXGILJKFLP
+AWS_SECRET_ACCESS_KEY=azkh2QQYh1________5kQunLMWfpMIT9j7ZGs
+AWS_ACCESS_KEY_ID=AKIA____________XGILJKFLP
 ```
 Пробуем воспользоваться CLI. Как и ожидалось утилита запросила данные:
 ```bash
 user1@devopserubuntu:~$ aws configure
-AWS Access Key ID [None]: azkh2QQYh1StLzFRDFRFb5kQunLMWfpMIT9j7ZGs
-AWS Secret Access Key [None]: AKIAVSFQ2YAXGILJKFLP
+AWS Access Key ID [None]: azkh2QQYh1_________WfpMIT9j7ZGs
+AWS Secret Access Key [None]: AKI_________KFLP
 Default region name [None]: us-east-1
 Default output format [None]: json
 ```
