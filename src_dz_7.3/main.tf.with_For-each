@@ -1,0 +1,45 @@
+# Настраиваем AWS Provider
+provider "aws" {
+  region = "us-east-1"
+}
+
+# Ищем свежайший образ Ubuntu server
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+
+#Добавляем список instances в виде  ключ-значение с указанием типа ВМ и образа ВМ
+locals {
+    instances = {
+	"t3.micro" = data.aws_ami.ubuntu.id
+	"t3.large" = data.aws_ami.ubuntu.id
+	    }
+}
+
+
+# Описываем создаваемые ВМ
+resource "aws_instance" "Second-vms-from-terraform" {
+
+# проходим по каждому пункту списка instances
+    for_each = local.instances
+    ami = each.value # берём образ ВМ
+    instance_type = each.key  # берём тип ВМ
+
+
+  tags = {
+    Name = "ExampleVM for each"
+  }
+}

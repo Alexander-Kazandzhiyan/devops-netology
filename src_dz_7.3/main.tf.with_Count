@@ -1,0 +1,93 @@
+# Настраиваем AWS Provider
+provider "aws" {
+  region = "us-east-1"
+}
+
+# Ищем свежайший образ Ubuntu server
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+# Создаём блок адресации
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "172.17.0.0/16"
+
+  tags = {
+    Name = "ExampleVPC"
+  }
+}
+
+# Создаём подсеть
+resource "aws_subnet" "my_subnet" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "172.17.10.0/24"
+  availability_zone = "us-east-1a"
+
+  tags = {
+    Name = "ExampleSubnet"
+  }
+}
+
+# Создаём сетевые интерфейсы с разными ip-адресами
+resource "aws_network_interface" "my_interface" {
+
+  # количество берётся как и количество ВМ
+  count = local.VM_instance_count_map[terraform.workspace]
+
+  subnet_id   = aws_subnet.my_subnet.id
+  # адрес генерируем на основе номера ВМ
+  private_ips = ["172.17.10.${200+count.index}"]
+
+  tags = {
+    Name = "Example_network_interface"
+  }
+}
+
+
+#Добавляем зависимость от воркспейса
+locals {
+    VM_instance_type_map = {
+      stage = "t2.nano"
+      prod = "t1.micro"}
+
+    VM_instance_count_map = {
+      stage = 1
+      prod = 2}
+}
+
+# Описываем создаваемую ВМ
+resource "aws_instance" "first-vm-from-terraform" {
+
+# Для создания ВМ указываем найденный нами образ, точнее его id
+  ami           = data.aws_ami.ubuntu.id
+
+#  Без зависимости от workspace
+#  instance_type = "t1.micro"
+
+# С зависимостью от workspace
+ instance_type = local.VM_instance_type_map[terraform.workspace]
+ count = local.VM_instance_count_map[terraform.workspace]
+
+# При описании ВМ указываем, созданный сетевой интерфейс с таким же номером
+  network_interface {
+    network_interface_id = aws_network_interface.my_interface[count.index].id
+    device_index         = 0
+  }
+
+
+  tags = {
+    Name = "ExampleVM"
+  }
+}
