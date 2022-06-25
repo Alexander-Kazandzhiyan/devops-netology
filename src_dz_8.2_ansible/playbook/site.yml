@@ -1,0 +1,122 @@
+---
+- name: Podgotovka Systemi
+  hosts: clickhouse
+  tasks:
+    - name: Repare yum repo
+      ansible.builtin.shell: cd /etc/yum.repos.d &&
+        sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* &&
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+    - name: Upgrade all packages (yum update)
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+
+    - name: ym install sudo
+      ansible.builtin.yum:
+        name: 'sudo'
+        state: latest
+
+- name: Install Clickhouse
+  hosts: clickhouse
+  handlers:
+    - name: Start clickhouse service
+      become: true
+      ansible.builtin.service:
+        name: clickhouse-server
+        state: restarted
+  tasks:
+    - block:
+        - name: Get clickhouse distrib
+          ansible.builtin.get_url:
+            url: "https://packages.clickhouse.com/rpm/stable/{{ item }}-{{ clickhouse_version }}.noarch.rpm"
+            dest: "./{{ item }}-{{ clickhouse_version }}.rpm"
+          with_items: "{{ clickhouse_packages }}"
+      rescue:
+        - name: Get clickhouse distrib
+          ansible.builtin.get_url:
+            url: "https://packages.clickhouse.com/rpm/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.rpm"
+            dest: "./clickhouse-common-static-{{ clickhouse_version }}.rpm"
+
+    - name: Install clickhouse packages
+      become: true
+      ansible.builtin.yum:
+        name:
+          - clickhouse-common-static-{{ clickhouse_version }}.rpm
+          - clickhouse-client-{{ clickhouse_version }}.rpm
+          - clickhouse-server-{{ clickhouse_version }}.rpm
+        disable_gpg_check: True
+      notify: Start clickhouse service
+
+    - name: Enable and start Clickhouse.server service
+      ansible.builtin.systemd:
+        name: clickhouse-server
+        enabled: yes
+        state: started
+
+    - name: Create database
+      ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+      register: create_db
+      failed_when: create_db.rc != 0 and create_db.rc !=82
+      changed_when: create_db.rc == 0
+
+- name: Install Vector
+  hosts: clickhouse
+  tasks:
+    - name: Get vector distrib
+      ansible.builtin.get_url:
+        url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: "/root/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz"
+
+    - name: Create vector ditrib directory
+      ansible.builtin.file:
+        path: /root/vector
+        state: directory
+        mode: '0775'
+
+    - name: Unpack distrib
+      ansible.builtin.unarchive:
+        src: "/root/vector-{{ vector_version }}-x86_64-unknown-linux-musl.tar.gz"
+        dest: /root
+        remote_src: yes
+
+    - name: Create bin link to vector
+      ansible.builtin.file:
+        src: /root/vector-x86_64-unknown-linux-musl/bin/vector
+        dest: /usr/bin/vector
+        state: hard
+
+    - name: Create vector config directory
+      ansible.builtin.file:
+        path: /etc/vector
+        state: directory
+        mode: '0775'
+
+    - name: Create link to vector config
+      ansible.builtin.file:
+        src: /root/vector-x86_64-unknown-linux-musl/config/vector.toml
+        dest: /etc/vector/vector.toml
+        state: hard
+
+    - name: Create vector work directory
+      ansible.builtin.file:
+        path: /var/lib/vector
+        state: directory
+        mode: '0777'
+
+    - name: Add user for vector service
+      ansible.builtin.user:
+        name: vector
+        comment: vector servie user
+
+    - name: Copy file unit to systemd
+      ansible.builtin.copy:
+        src: /root/vector-x86_64-unknown-linux-musl/etc/systemd/vector.service
+        dest: /etc/systemd/system
+        remote_src: yes
+
+    - name: Enable and start vector service
+      ansible.builtin.systemd:
+        name: vector
+        enabled: yes
+        state: started
